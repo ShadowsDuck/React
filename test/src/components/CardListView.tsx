@@ -11,6 +11,7 @@ import {
   Briefcase,
   Calendar,
   Search,
+  UserPlus,
 } from 'lucide-react';
 import { parse, format, isWithinInterval, set } from 'date-fns';
 
@@ -60,7 +61,6 @@ const MultiSelectCompany = ({ companies, selectedCompanies, onChange, placeholde
     return `${selectedCompanies.length} Selected`;
   }, [selectedCompanies, companies, placeholder]);
 
-
   return (
     <div className="relative w-full" ref={dropdownRef}>
       <button
@@ -73,7 +73,6 @@ const MultiSelectCompany = ({ companies, selectedCompanies, onChange, placeholde
             }`}
         />
       </button>
-
       {isOpen && (
         <div className="absolute z-10 mt-2 w-full rounded-md bg-gray-800 shadow-lg border border-gray-700 max-h-60 overflow-y-auto custom-scrollbar">
           <div className="p-2 border-b border-gray-700 sticky top-0 bg-gray-800">
@@ -122,24 +121,136 @@ const MultiSelectCompany = ({ companies, selectedCompanies, onChange, placeholde
   );
 };
 
+// Change Staff Popup Component
+const ChangeStaffPopup = ({ isOpen, onClose, conflictEvent, currentStaff }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+      <div className="bg-gray-800 rounded-2xl border border-gray-700 shadow-2xl w-full max-w-md">
+        {/* Header */}
+        <div className="p-6 border-b border-gray-700">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                <UserPlus className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">Change Staff Assignment</h3>
+                <p className="text-gray-400 text-sm">Resolve scheduling conflict</p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center transition-colors"
+            >
+              <X className="w-4 h-4 text-gray-400" />
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 space-y-4">
+          {/* Current Conflict Info */}
+          <div className="bg-gray-750 rounded-lg p-4 border border-gray-600">
+            <h4 className="font-semibold text-white text-sm mb-2">Current Conflict</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-400">Staff:</span>
+                <span className="text-white font-medium">{currentStaff}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Event:</span>
+                <span className="text-white">"{conflictEvent?.name}"</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Time:</span>
+                <span className="text-white">{conflictEvent?.time}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Company:</span>
+                <span className="text-white">{conflictEvent?.company}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Selection Area */}
+          <div className="space-y-3">
+            <h4 className="font-semibold text-white text-sm">Select Replacement Staff</h4>
+
+            {/* Staff Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search available staff..."
+                className="w-full pl-10 pr-3 py-3 text-sm bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Available Staff List */}
+            <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-2">
+              {['Sarah Wilson', 'Michael Brown', 'Jessica Lee', 'David Chen', 'Amanda Taylor'].map((staff) => (
+                <div
+                  key={staff}
+                  className="p-3 bg-gray-750 rounded-lg border border-gray-600 hover:border-blue-500 transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-white font-medium text-sm">{staff}</p>
+                      <p className="text-gray-400 text-xs">Available • No conflicts</p>
+                    </div>
+                    <div className="w-6 h-6 border-2 border-gray-500 rounded-full"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="p-6 border-t border-gray-700 bg-gray-750 rounded-b-2xl">
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              className="flex-1 px-4 py-3 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg font-medium transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+            >
+              <UserPlus className="w-4 h-4" />
+              Confirm Change
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export function CardListView() {
-  const [expandedCardId, setExpandedCardId] = useState(null); // Only one card can be expanded at a time
-  const [sortBy, setSortBy] = useState('conflicts'); // 'conflicts' | 'name' | 'time'
-  const [globalFilterCompany, setGlobalFilterCompany] = useState('all'); // Global company filter for the main list
+  const [expandedCardId, setExpandedCardId] = useState(null);
+  const [sortBy, setSortBy] = useState('conflicts');
+  const [globalFilterCompany, setGlobalFilterCompany] = useState('all');
+  const [changeStaffPopup, setChangeStaffPopup] = useState({
+    isOpen: false,
+    conflictEvent: null,
+    currentStaff: '',
+  });
 
   // State to manage ALL filters for the *currently expanded card*
   const [expandedCardFilters, setExpandedCardFilters] = useState({
     lockedStaffs: new Set(),
     hoveredStaff: null,
-    conflictingEventsSearchTerm: '', // New: search within conflicting events
-    conflictingEventsTimeFilter: { start: '', end: '' }, // New: time filter within conflicting events
-    conflictingEventsSelectedCompanies: [], // New: multi-select companies within conflicting events
+    conflictingEventsSearchTerm: '',
+    conflictingEventsTimeFilter: { start: '', end: '' },
+    conflictingEventsSelectedCompanies: [],
   });
 
   // Memoize all unique companies for the global filter dropdown
   const allCompanies = useMemo(() => Array.from(new Set(mockEvents.map((e) => e.company))), []);
-
 
   const getConflictCount = (eventId) => {
     return mockConflicts.filter((c) => c.event1 === eventId || c.event2 === eventId).length;
@@ -200,20 +311,16 @@ export function CardListView() {
       // แปลง string เป็น Date object (ใช้ปี 2000 เป็น dummy year)
       const filterStart = parse(timeFilter.start, 'HH:mm', new Date(2000, 0, 1));
       const filterEnd = parse(timeFilter.end, 'HH:mm', new Date(2000, 0, 1));
-
       events = events.filter((e) => {
         const match = e.time.match(/^(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})$/);
         if (!match) return true;
-
         const [, startStr, endStr] = match;
         const eventStart = parse(startStr, 'HH:mm', new Date(2000, 0, 1));
         const eventEnd = parse(endStr, 'HH:mm', new Date(2000, 0, 1));
-
         // เลือกโหมดที่ต้องการได้ที่นี่
         const hasOverlap = eventStart <= filterEnd && eventEnd >= filterStart;
         // หรือแบบเข้มงวด (อยู่ในช่วงทั้งหมด)
         // const fullyContained = eventStart >= filterStart && eventEnd <= filterEnd;
-
         return hasOverlap; // ← เปลี่ยนเป็น fullyContained ถ้าอยากเข้มงวด
       });
     }
@@ -222,7 +329,6 @@ export function CardListView() {
     if (selectedCompanies.length > 0 && selectedCompanies.length < allCompanies.length) {
       events = events.filter(event => selectedCompanies.includes(event.company));
     }
-
 
     return events;
   };
@@ -277,8 +383,7 @@ export function CardListView() {
       return events.sort((a, b) => a.time.localeCompare(b.time));
     }
     return events.sort((a, b) => a.name.localeCompare(b.name));
-  }, [globalFilterCompany, sortBy, mockEvents, mockConflicts]); // Re-calculate when these change
-
+  }, [globalFilterCompany, sortBy, mockEvents, mockConflicts]);
 
   // Handlers for staff filtering *within the expanded card*
   const toggleStaffLock = (staff) => {
@@ -351,9 +456,48 @@ export function CardListView() {
     });
   };
 
+  // Function to get staff conflicts details
+  const getStaffConflictsDetails = (eventId, staffName) => {
+    const staffConflicts = mockConflicts.filter(
+      (c) => c.person === staffName && (c.event1 === eventId || c.event2 === eventId)
+    );
+
+    const conflictEvents = staffConflicts.map((c) => {
+      const conflictEventId = c.event1 === eventId ? c.event2 : c.event1;
+      return mockEvents.find((e) => e.id === conflictEventId);
+    }).filter(Boolean);
+
+    return conflictEvents;
+  };
+
+  // Handler for opening change staff popup
+  const handleOpenChangeStaff = (conflictEvent, currentStaff) => {
+    setChangeStaffPopup({
+      isOpen: true,
+      conflictEvent,
+      currentStaff,
+    });
+  };
+
+  // Handler for closing change staff popup
+  const handleCloseChangeStaff = () => {
+    setChangeStaffPopup({
+      isOpen: false,
+      conflictEvent: null,
+      currentStaff: '',
+    });
+  };
 
   return (
     <div className="p-6 sm:p-8">
+      {/* Change Staff Popup */}
+      <ChangeStaffPopup
+        isOpen={changeStaffPopup.isOpen}
+        onClose={handleCloseChangeStaff}
+        conflictEvent={changeStaffPopup.conflictEvent}
+        currentStaff={changeStaffPopup.currentStaff}
+      />
+
       {/* View Header */}
       <div className="mb-8 border-b border-gray-700 pb-6">
         <h2 className="text-3xl font-bold mb-3 text-white">Events Card View</h2>
@@ -395,7 +539,6 @@ export function CardListView() {
               Name
             </button>
           </div>
-
           <div className="relative">
             <select
               value={globalFilterCompany}
@@ -480,7 +623,6 @@ export function CardListView() {
                           <span className="text-xl">✅</span>
                         </div>
                       )}
-
                       {/* Event Details */}
                       <div className="flex-1 text-left">
                         <h3 className={`font-extrabold text-xl ${isExpanded ? 'text-white' : 'text-gray-50'}`}>
@@ -496,7 +638,6 @@ export function CardListView() {
                         </div>
                       </div>
                     </div>
-
                     {/* Right Section - Conflict Count and Expand Button */}
                     <div className="flex items-center gap-3 sm:ml-auto">
                       {conflictCount > 0 && (
@@ -511,12 +652,12 @@ export function CardListView() {
                     </div>
                   </button>
 
-                  {/* Critical Issues Preview - Only show when NOT expanded */}
+                  {/* Conflicts Issues Preview - Only show when NOT expanded */}
                   {!isExpanded && conflictCount > 0 && (
                     <div className="px-6 pb-4 border-t border-gray-700 pt-3 bg-gray-850">
                       <div className="text-red-400 font-semibold text-sm mb-2 flex items-center gap-2">
                         <AlertCircle className="w-4 h-4" />
-                        Critical Issues
+                        Conflicts Issues
                       </div>
                       <ul className="space-y-1 text-sm">
                         {uniqueConflictingStaff.slice(0, 3).map((staff) => {
@@ -531,7 +672,6 @@ export function CardListView() {
                           const conflictEventNames = conflictEventIds
                             .map((id) => mockEvents.find((e) => e.id === id)?.name)
                             .filter(Boolean);
-
                           return (
                             <li key={staff} className="text-red-300">
                               • <span className="font-medium">{staff}</span> conflict{' '}
@@ -554,7 +694,61 @@ export function CardListView() {
                 {/* Expandable Content */}
                 {isExpanded && (
                   <div className="bg-gray-900 border-t border-gray-700 p-6 space-y-6">
-                    {/* Staff Assigned Section (Always present when expanded) */}
+                    {/* Action Required Section - Shows conflicting staff with details */}
+                    {conflictCount > 0 && (
+                      <div className="bg-red-900 bg-opacity-20 border border-red-800 rounded-xl p-5">
+                        <h4 className="font-bold text-red-300 mb-4 text-xl flex items-center gap-2">
+                          <AlertCircle className="w-5 h-5 text-red-400" />
+                          Action Required ({uniqueConflictingStaff.length} People)
+                        </h4>
+                        <div className="space-y-3">
+                          {uniqueConflictingStaff.map((staff) => {
+                            const conflictEvents = getStaffConflictsDetails(event.id, staff);
+                            const staffPosition = event.staff.find(s => s.name === staff)?.position || 'Staff';
+
+                            return (
+                              <div key={staff} className="bg-gray-800 bg-opacity-50 rounded-lg p-4 border border-red-800 border-opacity-50">
+                                <div className="flex items-start gap-3">
+                                  <div className="flex-shrink-0 w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-white text-xs font-bold mt-0.5">
+                                    {uniqueConflictingStaff.indexOf(staff) + 1}
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <span className="text-xs font-medium bg-red-800 bg-opacity-50 text-red-200 px-2 py-1 rounded">
+                                        [{staffPosition}]
+                                      </span>
+                                      <span className="font-semibold text-red-200">{staff}</span>
+                                    </div>
+                                    <div className="space-y-2">
+                                      {conflictEvents.map((conflictEvent, index) => (
+                                        <div key={index} className="flex items-center justify-between group">
+                                          <div className="flex items-center gap-2 text-sm">
+                                            <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                                            <span className="text-red-300">Conflict with</span>
+                                            <span className="font-medium text-white">"{conflictEvent.name}"</span>
+                                            <span className="text-gray-400 text-xs">
+                                              {conflictEvent.time} • {conflictEvent.company}
+                                            </span>
+                                          </div>
+                                          <button
+                                            onClick={() => handleOpenChangeStaff(conflictEvent, staff)}
+                                            className="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded-full font-medium transition-all duration-200 opacity-0 group-hover:opacity-100 hover:scale-105 shadow-md"
+                                          >
+                                            เปลี่ยนคน
+                                          </button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Staff Assigned Section */}
                     <div>
                       <h4 className="font-bold text-gray-100 mb-4 text-xl flex items-center gap-2">
                         <Users className="w-5 h-5 text-blue-400" /> Staff Assigned
@@ -565,7 +759,7 @@ export function CardListView() {
                             <p className="text-sm font-semibold text-blue-300 uppercase mb-2">{position}</p>
                             <div className="flex flex-wrap gap-2">
                               {names.map((name) => {
-                                const isConflicting = uniqueConflictingStaff.includes(name) && conflictCount > 0; // Only highlight if there are conflicts
+                                const isConflicting = uniqueConflictingStaff.includes(name) && conflictCount > 0;
                                 return (
                                   <span
                                     key={name}
@@ -584,210 +778,7 @@ export function CardListView() {
                       </div>
                     </div>
 
-                    {/* Only show conflict-related sections if there are conflicts */}
-                    {conflictCount > 0 ? (
-                      <>
-                        {/* Conflicting Staff Section */}
-                        {uniqueConflictingStaff.length > 0 && (
-                          <div className="pt-4 border-t border-gray-700">
-                            <h4 className="font-bold text-gray-100 mb-3 text-xl flex items-center gap-2">
-                              <Lock className="w-5 h-5 text-red-400" /> Conflicting Staff ({uniqueConflictingStaff.length})
-                            </h4>
-                            <div className="flex flex-wrap gap-2">
-                              {uniqueConflictingStaff.map((staff) => {
-                                const isHovered = hoveredStaff === staff;
-                                const isLocked = lockedStaffs.has(staff);
-                                return (
-                                  <button
-                                    key={staff}
-                                    onMouseEnter={() => lockedStaffs.size === 0 && handleSetHoveredStaff(staff)}
-                                    onMouseLeave={() => lockedStaffs.size === 0 && handleClearHoveredStaff()}
-                                    onClick={() => toggleStaffLock(staff)}
-                                    className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all duration-200 cursor-pointer flex items-center gap-2 ${isLocked
-                                      ? 'bg-blue-600 text-white border-blue-500 shadow-md'
-                                      : isHovered
-                                        ? 'bg-red-700 bg-opacity-60 text-red-100 border-red-500 scale-105 shadow-lg'
-                                        : 'bg-red-800 bg-opacity-30 text-red-200 border-red-700 border-opacity-50 hover:bg-opacity-50'
-                                      }`}
-                                    title={isLocked ? `Filtering by ${staff}. Click to unlock.` : `Click to filter by ${staff}`}
-                                  >
-                                    {staff}
-                                    {isLocked && <Lock className="w-3.5 h-3.5" />}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                            <p className="text-xs text-gray-500 mt-3 italic">
-                              Hover over a staff name to see their specific conflicts. Click to lock/unlock filter.
-                            </p>
-                          </div>
-                        )}
 
-                        {/* Conflicting Events Filters */}
-                        <div className="pt-4 border-t border-gray-700 space-y-4">
-                          <h4 className="font-bold text-gray-100 text-xl flex items-center gap-2">
-                            <AlertCircle className="w-5 h-5 text-yellow-400" /> Conflicts with {conflictingEvents.length} other event{conflictingEvents.length !== 1 ? 's' : ''}
-                            {(hoveredStaff || lockedStaffs.size > 0 || conflictingEventsSearchTerm || conflictingEventsTimeFilter.start || conflictingEventsTimeFilter.end || conflictingEventsSelectedCompanies.length > 0) && (
-                              <span className="text-sm font-normal text-blue-300 ml-2">
-                                (filtered)
-                              </span>
-                            )}
-                          </h4>
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {/* Search by Event Name */}
-                            <div className="relative">
-                              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                              <input
-                                type="text"
-                                placeholder="Search event name..."
-                                value={conflictingEventsSearchTerm}
-                                onChange={(e) => setConflictingEventsSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-3 py-2 text-sm bg-gray-700 border border-gray-600 rounded-md text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                              />
-                            </div>
-
-                            {/* Time Range Filter - ใช้ date-fns + dropdown 24 ชั่วโมง 100% */}
-                            <div className="flex items-center gap-4 col-span-1 md:col-span-1">
-                              {/* Start Time */}
-                              <div className="flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-gray-400" />
-                                <select
-                                  value={conflictingEventsTimeFilter.start}
-                                  onChange={(e) => setConflictingEventsTimeFilter('start', e.target.value)}
-                                  className="w-28 px-3 py-2.5 text-sm bg-gray-700 border border-gray-600 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                  <option value="">เริ่ม</option>
-                                  {Array.from({ length: 48 }, (_, i) => {
-                                    const hour = String(Math.floor(i / 2)).padStart(2, '0');
-                                    const minute = i % 2 === 0 ? '00' : '30';
-                                    const time = `${hour}:${minute}`;
-                                    return <option key={time} value={time}>{time}</option>;
-                                  })}
-                                </select>
-                                {conflictingEventsTimeFilter.start && (
-                                  <button onClick={() => setConflictingEventsTimeFilter('start', '')}>
-                                    <X className="w-4 h-4 text-gray-400 hover:text-red-400" />
-                                  </button>
-                                )}
-                              </div>
-
-                              <span className="text-gray-400">ถึง</span>
-
-                              {/* End Time */}
-                              <div className="flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-gray-400" />
-                                <select
-                                  value={conflictingEventsTimeFilter.end}
-                                  onChange={(e) => setConflictingEventsTimeFilter('end', e.target.value)}
-                                  className="w-28 px-3 py-2.5 text-sm bg-gray-700 border border-gray-600 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                  <option value="">สิ้นสุด</option>
-                                  {Array.from({ length: 48 }, (_, i) => {
-                                    const hour = String(Math.floor(i / 2)).padStart(2, '0');
-                                    const minute = i % 2 === 0 ? '00' : '30';
-                                    const time = `${hour}:${minute}`;
-                                    return <option key={time} value={time}>{time}</option>;
-                                  })}
-                                </select>
-                                {conflictingEventsTimeFilter.end && (
-                                  <button onClick={() => setConflictingEventsTimeFilter('end', '')}>
-                                    <X className="w-4 h-4 text-gray-400 hover:text-red-400" />
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Multi-select Company Filter */}
-                            <MultiSelectCompany
-                              companies={allCompanies}
-                              selectedCompanies={conflictingEventsSelectedCompanies}
-                              onChange={setConflictingEventsSelectedCompanies}
-                              placeholder="Filter by Company"
-                            />
-                          </div>
-                          {isAnyInternalFilterActive && (
-                            <div className="mt-4 text-right">
-                              <button
-                                onClick={handleClearAllInternalFilters}
-                                className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs rounded-full flex items-center gap-1 transition-all ml-auto w-fit"
-                                title="Clear all filters for this event's conflicts"
-                              >
-                                Clear All Filters <X className="w-3 h-3" />
-                              </button>
-                            </div>
-                          )}
-                        </div>
-
-
-                        {/* Conflicting Events List */}
-                        <div className="pt-4 border-t border-gray-700">
-                          {/* <h4 className="font-bold text-gray-100 mb-3 text-xl flex items-center gap-2">
-                            <AlertCircle className="w-5 h-5 text-yellow-400" /> Conflicts with {conflictingEvents.length} other event{conflictingEvents.length !== 1 ? 's' : ''}
-                            {(hoveredStaff || lockedStaffs.size > 0 || conflictingEventsSearchTerm || conflictingEventsTimeFilter.start || conflictingEventsTimeFilter.end || conflictingEventsSelectedCompanies.length > 0) && (
-                              <span className="text-sm font-normal text-blue-300 ml-2">
-                                (filtered)
-                              </span>
-                            )}
-                          </h4> */}
-                          <div className="space-y-3 max-h-72 overflow-y-auto pr-2 custom-scrollbar">
-                            {conflictingEvents.length > 0 ? (
-                              conflictingEvents.map((conflictEvent) => {
-                                const sharedStaff = mockConflicts
-                                  .filter(
-                                    (c) =>
-                                      (c.event1 === event.id && c.event2 === conflictEvent?.id) ||
-                                      (c.event1 === conflictEvent?.id && c.event2 === event.id)
-                                  )
-                                  .map((c) => c.person);
-
-                                return (
-                                  <div
-                                    key={conflictEvent?.id}
-                                    className="p-4 bg-gray-800 rounded-lg border border-gray-700 hover:border-red-600 transition-all duration-200 shadow-sm"
-                                  >
-                                    <div className="flex items-start justify-between gap-3">
-                                      <div className="flex-1">
-                                        <p className="font-semibold text-gray-50 text-lg">{conflictEvent?.name}</p>
-                                        <div className="flex items-center gap-2 text-sm text-gray-400 mt-1">
-                                          <Clock className="w-4 h-4" /> {conflictEvent?.time}
-                                          <Briefcase className="w-4 h-4 ml-2" />
-                                          <span className={`text-xs px-2 py-0.5 rounded-full border ${getCompanyBadgeColor(conflictEvent.company)}`}>
-                                            {conflictEvent?.company}
-                                          </span>
-                                        </div>
-                                        <p className="text-sm text-gray-500 mt-2 flex items-center gap-1.5">
-                                          <Users className="w-4 h-4 text-gray-500" />
-                                          <span className="font-medium">Shared Staff:</span> {sharedStaff.join(', ')}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                );
-                              })
-                            ) : (
-                              <p className="text-gray-400 text-base py-3 text-center bg-gray-800 rounded-lg">
-                                No conflicting events found with the current filters.
-                              </p>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-700">
-                          <button className="flex-1 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-base transition-all duration-200 shadow-md">
-                            Reschedule Event
-                          </button>
-                          <button className="flex-1 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold text-base transition-all duration-200 shadow-md">
-                            Mark Conflict Resolved
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="flex items-center gap-3 text-green-400 py-3 bg-green-900/20 rounded-lg justify-center">
-                        <AlertCircle className="w-6 h-6" />
-                        <span className="font-semibold text-lg">No conflicts detected for this event!</span>
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
