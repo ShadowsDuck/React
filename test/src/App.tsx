@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { CardListView } from './components/CardListView';
 import './App.css'; // You might want to create an App.css or just use index.css
+import { BarChart3, Package, PlusCircle } from 'lucide-react';
 
 // Dummy Card component (enhanced with subtle shadow)
 const Card = ({ children, className }) => (
@@ -37,11 +38,10 @@ export default function App() {
         <nav className="flex gap-4 mb-10 justify-center sm:justify-start">
           <Button
             onClick={() => setActiveView('card')}
-            className={`${
-              activeView === 'card'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30'
-                : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
-            }`}
+            className={`${activeView === 'card'
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30'
+              : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
+              }`}
           >
             Card View
           </Button>

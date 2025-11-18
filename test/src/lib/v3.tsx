@@ -1,6 +1,6 @@
 // src/components/CardListView.jsx
-import { useState, useMemo, useRef, useEffect } from "react";
-import { mockEvents, mockConflicts } from "../lib/mock-data";
+import { useState, useMemo, useRef, useEffect } from 'react';
+import { mockEvents, mockConflicts } from '../lib/mock-data';
 import {
   ChevronDown,
   AlertCircle,
@@ -14,24 +14,16 @@ import {
   UserPlus,
   MapPin,
   FileText,
-  Upload,
-  Edit3,
-  Trash2,
-  Plus,
   Check,
+  Star,
   Zap,
-} from "lucide-react";
-import { parse, format, isWithinInterval, set } from "date-fns";
+} from 'lucide-react';
+import { parse, format, isWithinInterval, set } from 'date-fns';
 
 // Re-usable MultiSelectCompany component
-const MultiSelectCompany = ({
-  companies,
-  selectedCompanies,
-  onChange,
-  placeholder = "Select Companies",
-}) => {
+const MultiSelectCompany = ({ companies, selectedCompanies, onChange, placeholder = "Select Companies" }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -40,9 +32,9 @@ const MultiSelectCompany = ({
         setIsOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -70,7 +62,7 @@ const MultiSelectCompany = ({
 
   const displayValue = useMemo(() => {
     if (selectedCompanies.length === 0) return placeholder;
-    if (selectedCompanies.length === companies.length) return "All Companies";
+    if (selectedCompanies.length === companies.length) return 'All Companies';
     return `${selectedCompanies.length} Selected`;
   }, [selectedCompanies, companies, placeholder]);
 
@@ -82,7 +74,7 @@ const MultiSelectCompany = ({
       >
         <span>{displayValue}</span>
         <ChevronDown
-          className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""
+          className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''
             }`}
         />
       </button>
@@ -125,9 +117,7 @@ const MultiSelectCompany = ({
               </label>
             ))}
             {filteredCompanies.length === 0 && (
-              <p className="text-center text-gray-500 text-sm py-4">
-                No companies found.
-              </p>
+              <p className="text-center text-gray-500 text-sm py-4">No companies found.</p>
             )}
           </div>
         </div>
@@ -136,7 +126,7 @@ const MultiSelectCompany = ({
   );
 };
 
-// New Change Staff Popup Component
+// Change Staff Popup Component - เวอร์ชันมีตัวชี้นำ
 const ChangeStaffPopup = ({ isOpen, onClose, conflictEvent, currentStaff, currentEvent }) => {
   const [selectedReplacement, setSelectedReplacement] = useState('');
   const [targetEvent, setTargetEvent] = useState('currentEvent');
@@ -663,12 +653,12 @@ const ChangeStaffPopup = ({ isOpen, onClose, conflictEvent, currentStaff, curren
 
 export function CardListView() {
   const [expandedCardId, setExpandedCardId] = useState(null);
-  const [sortBy, setSortBy] = useState("conflicts");
-  const [globalFilterCompany, setGlobalFilterCompany] = useState("all");
+  const [sortBy, setSortBy] = useState('conflicts');
+  const [globalFilterCompany, setGlobalFilterCompany] = useState('all');
   const [changeStaffPopup, setChangeStaffPopup] = useState({
     isOpen: false,
     conflictEvent: null,
-    currentStaff: "",
+    currentStaff: '',
     currentEvent: null,
   });
 
@@ -676,31 +666,22 @@ export function CardListView() {
   const [expandedCardFilters, setExpandedCardFilters] = useState({
     lockedStaffs: new Set(),
     hoveredStaff: null,
-    conflictingEventsSearchTerm: "",
-    conflictingEventsTimeFilter: { start: "", end: "" },
+    conflictingEventsSearchTerm: '',
+    conflictingEventsTimeFilter: { start: '', end: '' },
     conflictingEventsSelectedCompanies: [],
   });
 
   // Memoize all unique companies for the global filter dropdown
-  const allCompanies = useMemo(
-    () => Array.from(new Set(mockEvents.map((e) => e.company))),
-    []
-  );
+  const allCompanies = useMemo(() => Array.from(new Set(mockEvents.map((e) => e.company))), []);
 
   const getConflictCount = (eventId) => {
-    return mockConflicts.filter(
-      (c) => c.event1 === eventId || c.event2 === eventId
-    ).length;
+    return mockConflicts.filter((c) => c.event1 === eventId || c.event2 === eventId).length;
   };
 
   const getConflictingStaff = (eventId) => {
-    return [
-      ...new Set(
-        mockConflicts
-          .filter((c) => c.event1 === eventId || c.event2 === eventId)
-          .map((c) => c.person)
-      ),
-    ];
+    return [...new Set(mockConflicts
+      .filter((c) => c.event1 === eventId || c.event2 === eventId)
+      .map((c) => c.person))];
   };
 
   // Modified to accept all per-card filters for the "Conflicts with X other events" section
@@ -723,12 +704,9 @@ export function CardListView() {
       .filter(Boolean);
 
     // 1. Filter by Staff (locked or hovered)
-    const staffsToFilter =
-      currentLockedStaffs.size > 0
-        ? currentLockedStaffs
-        : currentHoveredStaff
-          ? new Set([currentHoveredStaff])
-          : new Set();
+    const staffsToFilter = currentLockedStaffs.size > 0
+      ? currentLockedStaffs
+      : (currentHoveredStaff ? new Set([currentHoveredStaff]) : new Set());
 
     if (staffsToFilter.size > 0) {
       events = events.filter((event) =>
@@ -745,7 +723,7 @@ export function CardListView() {
 
     // 2. Filter by Search Term (event name)
     if (searchTerm) {
-      events = events.filter((event) =>
+      events = events.filter(event =>
         event.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -753,18 +731,14 @@ export function CardListView() {
     // 3. Filter by Time Range - ใช้ date-fns อย่างถูกต้อง
     if (timeFilter.start && timeFilter.end) {
       // แปลง string เป็น Date object (ใช้ปี 2000 เป็น dummy year)
-      const filterStart = parse(
-        timeFilter.start,
-        "HH:mm",
-        new Date(2000, 0, 1)
-      );
-      const filterEnd = parse(timeFilter.end, "HH:mm", new Date(2000, 0, 1));
+      const filterStart = parse(timeFilter.start, 'HH:mm', new Date(2000, 0, 1));
+      const filterEnd = parse(timeFilter.end, 'HH:mm', new Date(2000, 0, 1));
       events = events.filter((e) => {
         const match = e.time.match(/^(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})$/);
         if (!match) return true;
         const [, startStr, endStr] = match;
-        const eventStart = parse(startStr, "HH:mm", new Date(2000, 0, 1));
-        const eventEnd = parse(endStr, "HH:mm", new Date(2000, 0, 1));
+        const eventStart = parse(startStr, 'HH:mm', new Date(2000, 0, 1));
+        const eventEnd = parse(endStr, 'HH:mm', new Date(2000, 0, 1));
         // เลือกโหมดที่ต้องการได้ที่นี่
         const hasOverlap = eventStart <= filterEnd && eventEnd >= filterStart;
         return hasOverlap;
@@ -772,13 +746,8 @@ export function CardListView() {
     }
 
     // 4. Filter by Selected Companies
-    if (
-      selectedCompanies.length > 0 &&
-      selectedCompanies.length < allCompanies.length
-    ) {
-      events = events.filter((event) =>
-        selectedCompanies.includes(event.company)
-      );
+    if (selectedCompanies.length > 0 && selectedCompanies.length < allCompanies.length) {
+      events = events.filter(event => selectedCompanies.includes(event.company));
     }
 
     return events;
@@ -797,42 +766,40 @@ export function CardListView() {
 
   const getCompanyColor = (company) => {
     const colors = {
-      "Tech Corp": "from-blue-600 to-blue-700",
-      "Global Solutions": "from-purple-600 to-purple-700",
-      "Healthcare Plus": "from-pink-600 to-pink-700",
-      "Retail Co": "from-amber-600 to-amber-700",
-      "Finance Ltd": "from-emerald-600 to-emerald-700",
-      "Innovate Inc": "from-cyan-600 to-cyan-700",
-      "Innovate LLC": "from-orange-600 to-orange-700",
-      "Media Inc": "from-teal-600 to-teal-700",
+      'Tech Corp': 'from-blue-600 to-blue-700',
+      'Global Solutions': 'from-purple-600 to-purple-700',
+      'Healthcare Plus': 'from-pink-600 to-pink-700',
+      'Retail Co': 'from-amber-600 to-amber-700',
+      'Finance Ltd': 'from-emerald-600 to-emerald-700',
+      'Innovate Inc': 'from-cyan-600 to-cyan-700',
+      'Innovate LLC': 'from-orange-600 to-orange-700',
+      'Media Inc': 'from-teal-600 to-teal-700',
     };
-    return colors[company] || "from-slate-600 to-slate-700";
+    return colors[company] || 'from-slate-600 to-slate-700';
   };
 
   const getCompanyBadgeColor = (company) => {
     const colors = {
-      "Tech Corp": "bg-blue-800 text-blue-200 border-blue-700",
-      "Global Solutions": "bg-purple-800 text-purple-200 border-purple-700",
-      "Healthcare Plus": "bg-pink-800 text-pink-200 border-pink-700",
-      "Retail Co": "bg-amber-800 text-amber-200 border-amber-700",
-      "Finance Ltd": "bg-emerald-800 text-emerald-200 border-emerald-700",
-      "Innovate Inc": "bg-cyan-800 text-cyan-200 border-cyan-700",
-      "Innovate LLC": "bg-orange-800 text-orange-200 border-orange-700",
-      "Media Inc": "bg-teal-800 text-teal-200 border-teal-700",
+      'Tech Corp': 'bg-blue-800 text-blue-200 border-blue-700',
+      'Global Solutions': 'bg-purple-800 text-purple-200 border-purple-700',
+      'Healthcare Plus': 'bg-pink-800 text-pink-200 border-pink-700',
+      'Retail Co': 'bg-amber-800 text-amber-200 border-amber-700',
+      'Finance Ltd': 'bg-emerald-800 text-emerald-200 border-emerald-700',
+      'Innovate Inc': 'bg-cyan-800 text-cyan-200 border-cyan-700',
+      'Innovate LLC': 'bg-orange-800 text-orange-200 border-orange-700',
+      'Media Inc': 'bg-teal-800 text-teal-200 border-teal-700',
     };
-    return colors[company] || "bg-slate-700 text-slate-300 border-slate-600";
+    return colors[company] || 'bg-slate-700 text-slate-300 border-slate-600';
   };
 
   const getSortedEvents = useMemo(() => {
     let events = [...mockEvents];
-    if (globalFilterCompany !== "all") {
+    if (globalFilterCompany !== 'all') {
       events = events.filter((e) => e.company === globalFilterCompany);
     }
-    if (sortBy === "conflicts") {
-      return events.sort(
-        (a, b) => getConflictCount(b.id) - getConflictCount(a.id)
-      );
-    } else if (sortBy === "time") {
+    if (sortBy === 'conflicts') {
+      return events.sort((a, b) => getConflictCount(b.id) - getConflictCount(a.id));
+    } else if (sortBy === 'time') {
       return events.sort((a, b) => a.time.localeCompare(b.time));
     }
     return events.sort((a, b) => a.name.localeCompare(b.name));
@@ -866,8 +833,8 @@ export function CardListView() {
       setExpandedCardFilters({
         lockedStaffs: new Set(),
         hoveredStaff: null,
-        conflictingEventsSearchTerm: "",
-        conflictingEventsTimeFilter: { start: "", end: "" },
+        conflictingEventsSearchTerm: '',
+        conflictingEventsTimeFilter: { start: '', end: '' },
         conflictingEventsSelectedCompanies: [],
       });
     } else {
@@ -876,8 +843,8 @@ export function CardListView() {
       setExpandedCardFilters({
         lockedStaffs: new Set(),
         hoveredStaff: null,
-        conflictingEventsSearchTerm: "",
-        conflictingEventsTimeFilter: { start: "", end: "" },
+        conflictingEventsSearchTerm: '',
+        conflictingEventsTimeFilter: { start: '', end: '' },
         conflictingEventsSelectedCompanies: [],
       });
     }
@@ -885,35 +852,26 @@ export function CardListView() {
 
   // Handlers for conflicting events filters *within the expanded card*
   const setConflictingEventsSearchTerm = (term) => {
-    setExpandedCardFilters((prev) => ({
-      ...prev,
-      conflictingEventsSearchTerm: term,
-    }));
+    setExpandedCardFilters((prev) => ({ ...prev, conflictingEventsSearchTerm: term }));
   };
 
   const setConflictingEventsTimeFilter = (type, value) => {
     setExpandedCardFilters((prev) => ({
       ...prev,
-      conflictingEventsTimeFilter: {
-        ...prev.conflictingEventsTimeFilter,
-        [type]: value,
-      },
+      conflictingEventsTimeFilter: { ...prev.conflictingEventsTimeFilter, [type]: value },
     }));
   };
 
   const setConflictingEventsSelectedCompanies = (companies) => {
-    setExpandedCardFilters((prev) => ({
-      ...prev,
-      conflictingEventsSelectedCompanies: companies,
-    }));
+    setExpandedCardFilters((prev) => ({ ...prev, conflictingEventsSelectedCompanies: companies }));
   };
 
   const handleClearAllInternalFilters = () => {
     setExpandedCardFilters({
       lockedStaffs: new Set(),
       hoveredStaff: null,
-      conflictingEventsSearchTerm: "",
-      conflictingEventsTimeFilter: { start: "", end: "" },
+      conflictingEventsSearchTerm: '',
+      conflictingEventsTimeFilter: { start: '', end: '' },
       conflictingEventsSelectedCompanies: [],
     });
   };
@@ -921,16 +879,13 @@ export function CardListView() {
   // Function to get staff conflicts details
   const getStaffConflictsDetails = (eventId, staffName) => {
     const staffConflicts = mockConflicts.filter(
-      (c) =>
-        c.person === staffName && (c.event1 === eventId || c.event2 === eventId)
+      (c) => c.person === staffName && (c.event1 === eventId || c.event2 === eventId)
     );
 
-    const conflictEvents = staffConflicts
-      .map((c) => {
-        const conflictEventId = c.event1 === eventId ? c.event2 : c.event1;
-        return mockEvents.find((e) => e.id === conflictEventId);
-      })
-      .filter(Boolean);
+    const conflictEvents = staffConflicts.map((c) => {
+      const conflictEventId = c.event1 === eventId ? c.event2 : c.event1;
+      return mockEvents.find((e) => e.id === conflictEventId);
+    }).filter(Boolean);
 
     return conflictEvents;
   };
@@ -950,7 +905,7 @@ export function CardListView() {
     setChangeStaffPopup({
       isOpen: false,
       conflictEvent: null,
-      currentStaff: "",
+      currentStaff: '',
       currentEvent: null,
     });
   };
@@ -970,8 +925,7 @@ export function CardListView() {
       <div className="mb-8 border-b border-gray-700 pb-6">
         <h2 className="text-3xl font-bold mb-3 text-white">Events Card View</h2>
         <p className="text-gray-400 text-base">
-          Explore events and their conflicts. Click on a card to view detailed
-          staff assignments and conflicting events.
+          Explore events and their conflicts. Click on a card to view detailed staff assignments and conflicting events.
         </p>
       </div>
 
@@ -979,32 +933,30 @@ export function CardListView() {
       <div className="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-inner mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="text-gray-300 font-semibold text-sm mr-1">
-              Sort by:
-            </span>
+            <span className="text-gray-300 font-semibold text-sm mr-1">Sort by:</span>
             <button
-              onClick={() => setSortBy("conflicts")}
-              className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 ${sortBy === "conflicts"
-                ? "bg-blue-600 text-white shadow-sm"
-                : "bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white"
+              onClick={() => setSortBy('conflicts')}
+              className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 ${sortBy === 'conflicts'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white'
                 }`}
             >
               Conflicts
             </button>
             <button
-              onClick={() => setSortBy("time")}
-              className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 ${sortBy === "time"
-                ? "bg-blue-600 text-white shadow-sm"
-                : "bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white"
+              onClick={() => setSortBy('time')}
+              className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 ${sortBy === 'time'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white'
                 }`}
             >
               Time
             </button>
             <button
-              onClick={() => setSortBy("name")}
-              className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 ${sortBy === "name"
-                ? "bg-blue-600 text-white shadow-sm"
-                : "bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white"
+              onClick={() => setSortBy('name')}
+              className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 ${sortBy === 'name'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white'
                 }`}
             >
               Name
@@ -1061,24 +1013,22 @@ export function CardListView() {
             const isAnyInternalFilterActive =
               lockedStaffs.size > 0 ||
               hoveredStaff !== null ||
-              conflictingEventsSearchTerm !== "" ||
-              conflictingEventsTimeFilter.start !== "" ||
-              conflictingEventsTimeFilter.end !== "" ||
+              conflictingEventsSearchTerm !== '' ||
+              conflictingEventsTimeFilter.start !== '' ||
+              conflictingEventsTimeFilter.end !== '' ||
               conflictingEventsSelectedCompanies.length > 0;
 
             return (
               <div
                 key={event.id}
-                className={`rounded-xl border transition-all duration-300 ${isExpanded
-                  ? `border-blue-500 shadow-xl shadow-blue-900/20`
-                  : "border-gray-700 hover:border-gray-600"
+                className={`rounded-xl border transition-all duration-300 ${isExpanded ? `border-blue-500 shadow-xl shadow-blue-900/20` : 'border-gray-700 hover:border-gray-600'
                   } overflow-hidden`}
               >
                 {/* Card Header - Always Visible */}
                 <div
                   className={`w-full transition-all duration-300 ${isExpanded
                     ? `bg-gradient-to-r ${getCompanyColor(event.company)}`
-                    : "bg-gray-850 hover:bg-gray-800"
+                    : 'bg-gray-850 hover:bg-gray-800'
                     }`}
                 >
                   <button
@@ -1098,117 +1048,113 @@ export function CardListView() {
                       )}
                       {/* Event Details */}
                       <div className="flex-1 text-left">
-                        <h3
-                          className={`font-extrabold text-xl ${isExpanded ? "text-white" : "text-gray-50"
-                            }`}
-                        >
+                        <h3 className={`font-extrabold text-xl ${isExpanded ? 'text-white' : 'text-gray-50'}`}>
                           {event.name}
                         </h3>
-                        <div
-                          className={`flex items-center gap-3 mt-1 ${isExpanded ? "text-blue-100" : "text-gray-400"
-                            }`}
-                        >
+                        <div className={`flex items-center gap-3 mt-1 ${isExpanded ? 'text-blue-100' : 'text-gray-400'}`}>
                           <Calendar className="w-4 h-4" />
                           <span className="text-sm">{event.time}</span>
                           <Briefcase className="w-4 h-4 ml-2" />
-                          <span
-                            className={`text-xs px-2 py-0.5 rounded-full border ${getCompanyBadgeColor(
-                              event.company
-                            )}`}
-                          >
+                          <span className={`text-xs px-2 py-0.5 rounded-full border ${getCompanyBadgeColor(event.company)}`}>
                             {event.company}
                           </span>
+                          {conflictCount === 0 && (
+                            <span className="text-xs px-2 py-0.5 bg-green-600 text-white rounded-full flex items-center gap-1">
+                              <Check className="w-3 h-3" />
+                              No Conflicts
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
                     {/* Right Section - Status and Expand Button */}
                     <div className="flex items-center gap-3 sm:ml-auto">
                       {conflictCount > 0 ? (
-                        <span
-                          className={`text-lg font-semibold ${isExpanded ? "text-white" : "text-red-400"
-                            }`}
-                        >
-                          {conflictCount} Conflict
-                          {conflictCount !== 1 ? "s" : ""}
+                        <span className={`text-lg font-semibold ${isExpanded ? 'text-white' : 'text-red-400'}`}>
+                          {conflictCount} Conflict{conflictCount !== 1 ? 's' : ''}
                         </span>
                       ) : (
-                        <span
-                          className={`text-lg font-semibold ${isExpanded ? "text-white" : "text-green-400"
-                            }`}
-                        >
-                          Complete
+                        <span className={`text-lg font-semibold ${isExpanded ? 'text-white' : 'text-green-400'}`}>
+                          Ready
                         </span>
                       )}
                       <ChevronDown
-                        className={`w-6 h-6 transition-transform duration-300 ${isExpanded ? "rotate-180 text-white" : "text-gray-400"
+                        className={`w-6 h-6 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-white' : 'text-gray-400'
                           }`}
                       />
                     </div>
                   </button>
 
                   {/* Preview Section - Only show when NOT expanded */}
-                  {!isExpanded && conflictCount > 0 && (
+                  {!isExpanded && (
                     <div className="px-6 pb-4 border-t border-gray-700 pt-3 bg-gray-850">
-                      <div>
-                        <div className="text-red-400 font-semibold text-sm mb-2 flex items-center gap-2">
-                          <AlertCircle className="w-4 h-4" />
-                          Conflicts Issues
-                        </div>
-                        <ul className="space-y-1 text-sm">
-                          {uniqueConflictingStaff
-                            .slice(0, 3)
-                            .map((staff) => {
+                      {conflictCount > 0 ? (
+                        // Conflict Preview
+                        <div>
+                          <div className="text-red-400 font-semibold text-sm mb-2 flex items-center gap-2">
+                            <AlertCircle className="w-4 h-4" />
+                            Conflicts Issues
+                          </div>
+                          <ul className="space-y-1 text-sm">
+                            {uniqueConflictingStaff.slice(0, 3).map((staff) => {
                               const staffConflicts = mockConflicts.filter(
                                 (c) =>
                                   c.person === staff &&
-                                  (c.event1 === event.id ||
-                                    c.event2 === event.id)
+                                  (c.event1 === event.id || c.event2 === event.id)
                               );
-                              const conflictEventIds = staffConflicts.map(
-                                (c) =>
-                                  c.event1 === event.id
-                                    ? c.event2
-                                    : c.event1
+                              const conflictEventIds = staffConflicts.map((c) =>
+                                c.event1 === event.id ? c.event2 : c.event1
                               );
                               const conflictEventNames = conflictEventIds
-                                .map(
-                                  (id) =>
-                                    mockEvents.find((e) => e.id === id)
-                                      ?.name
-                                )
+                                .map((id) => mockEvents.find((e) => e.id === id)?.name)
                                 .filter(Boolean);
                               return (
                                 <li key={staff} className="text-red-300">
-                                  •{" "}
-                                  <span className="font-medium">
-                                    {staff}
-                                  </span>{" "}
-                                  conflict{" "}
-                                  <span className="text-red-400 font-semibold">
-                                    ({conflictEventNames.length} event
-                                    {conflictEventNames.length !== 1
-                                      ? "s"
-                                      : ""}
-                                    )
-                                  </span>{" "}
-                                  with{" "}
-                                  {conflictEventNames
-                                    .slice(0, 2)
-                                    .join(", ")}
-                                  {conflictEventNames.length > 2 &&
-                                    ` +${conflictEventNames.length - 2
-                                    } more`}
+                                  • <span className="font-medium">{staff}</span> conflict{' '}
+                                  <span className="text-red-400 font-semibold">({conflictEventNames.length} event{conflictEventNames.length !== 1 ? 's' : ''})</span>{' '}
+                                  with {conflictEventNames.slice(0, 2).join(', ')}
+                                  {conflictEventNames.length > 2 && ` +${conflictEventNames.length - 2} more`}
                                 </li>
                               );
                             })}
-                          {uniqueConflictingStaff.length > 3 && (
-                            <li className="text-red-300 italic">
-                              +{uniqueConflictingStaff.length - 3} more
-                              staff conflicts...
-                            </li>
-                          )}
-                        </ul>
-                      </div>
+                            {uniqueConflictingStaff.length > 3 && (
+                              <li className="text-red-300 italic">
+                                +{uniqueConflictingStaff.length - 3} more staff conflicts...
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+                      ) : (
+                        // No Conflict Preview - Show event summary
+                        <div className="space-y-3">
+                          <div className="text-green-400 font-semibold text-sm flex items-center gap-2">
+                            <Check className="w-4 h-4" />
+                            Event Ready - All systems go!
+                          </div>
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 text-gray-300">
+                                <Users className="w-4 h-4 text-blue-400" />
+                                <span>Staff: {event.staff.length} people</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-gray-300">
+                                <MapPin className="w-4 h-4 text-green-400" />
+                                <span>Location: Ready</span>
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 text-gray-300">
+                                <Briefcase className="w-4 h-4 text-purple-400" />
+                                <span>Equipment: Complete</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-gray-300">
+                                <FileText className="w-4 h-4 text-yellow-400" />
+                                <span>Documents: Ready</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1216,271 +1162,143 @@ export function CardListView() {
                 {/* Expandable Content */}
                 {isExpanded && (
                   <div className="bg-gray-900 border-t border-gray-700 p-6 space-y-6">
-                    {/* Action Required Section - Only show when there are conflicts */}
-                    {conflictCount > 0 && (
-                      <div className="bg-red-900 bg-opacity-20 border border-red-800 rounded-xl p-5">
-                        <h4 className="font-bold text-red-300 mb-4 text-xl flex items-center gap-2">
-                          <AlertCircle className="w-5 h-5 text-red-400" />
-                          Action Required ({
-                            uniqueConflictingStaff.length
-                          }{" "}
-                          People)
-                        </h4>
-                        <div className="space-y-3">
-                          {uniqueConflictingStaff.map((staff) => {
-                            const conflictEvents = getStaffConflictsDetails(
-                              event.id,
-                              staff
-                            );
-                            const staffPosition =
-                              event.staff.find((s) => s.name === staff)
-                                ?.position || "Staff";
+                    {conflictCount > 0 ? (
+                      // Conflict View
+                      <>
+                        {/* Action Required Section */}
+                        <div className="bg-red-900 bg-opacity-20 border border-red-800 rounded-xl p-5">
+                          <h4 className="font-bold text-red-300 mb-4 text-xl flex items-center gap-2">
+                            <AlertCircle className="w-5 h-5 text-red-400" />
+                            Action Required ({uniqueConflictingStaff.length} People)
+                          </h4>
+                          <div className="space-y-3">
+                            {uniqueConflictingStaff.map((staff) => {
+                              const conflictEvents = getStaffConflictsDetails(event.id, staff);
+                              const staffPosition = event.staff.find(s => s.name === staff)?.position || 'Staff';
 
-                            return (
-                              <div
-                                key={staff}
-                                className="bg-gray-800 bg-opacity-50 rounded-lg p-4 border border-red-800 border-opacity-50"
-                              >
-                                <div className="flex items-start gap-3">
-                                  <div className="flex-shrink-0 w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-white text-xs font-bold mt-0.5">
-                                    {uniqueConflictingStaff.indexOf(staff) +
-                                      1}
-                                  </div>
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <span className="text-xs font-medium bg-red-800 bg-opacity-50 text-red-200 px-2 py-1 rounded">
-                                        [{staffPosition}]
-                                      </span>
-                                      <span className="font-semibold text-red-200">
-                                        {staff}
-                                      </span>
+                              return (
+                                <div key={staff} className="bg-gray-800 bg-opacity-50 rounded-lg p-4 border border-red-800 border-opacity-50">
+                                  <div className="flex items-start gap-3">
+                                    <div className="flex-shrink-0 w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-white text-xs font-bold mt-0.5">
+                                      {uniqueConflictingStaff.indexOf(staff) + 1}
                                     </div>
-                                    <div className="space-y-2">
-                                      {conflictEvents.map(
-                                        (conflictEvent, index) => (
-                                          <div
-                                            key={index}
-                                            className="flex items-center justify-between group"
-                                          >
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <span className="text-xs font-medium bg-red-800 bg-opacity-50 text-red-200 px-2 py-1 rounded">
+                                          [{staffPosition}]
+                                        </span>
+                                        <span className="font-semibold text-red-200">{staff}</span>
+                                      </div>
+                                      <div className="space-y-2">
+                                        {conflictEvents.map((conflictEvent, index) => (
+                                          <div key={index} className="flex items-center justify-between group">
                                             <div className="flex items-center gap-2 text-sm">
                                               <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                                              <span className="text-red-300">
-                                                Conflict with
-                                              </span>
-                                              <span className="font-medium text-white">
-                                                "{conflictEvent.name}"
-                                              </span>
+                                              <span className="text-red-300">Conflict with</span>
+                                              <span className="font-medium text-white">"{conflictEvent.name}"</span>
                                               <span className="text-gray-400 text-xs">
-                                                {conflictEvent.time} •{" "}
-                                                {conflictEvent.company}
+                                                {conflictEvent.time} • {conflictEvent.company}
                                               </span>
                                             </div>
                                             <button
-                                              onClick={() =>
-                                                handleOpenChangeStaff(
-                                                  conflictEvent,
-                                                  staff,
-                                                  event
-                                                )
-                                              }
+                                              onClick={() => handleOpenChangeStaff(conflictEvent, staff, event)}
                                               className="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded-full font-medium transition-all duration-200 opacity-0 group-hover:opacity-100 hover:scale-105 shadow-md"
                                             >
                                               เปลี่ยนคน
                                             </button>
                                           </div>
-                                        )
-                                      )}
+                                        ))}
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Event Information - Show for both conflict and complete events */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <h4 className="font-bold text-gray-100 text-lg flex items-center gap-2">
-                          <FileText className="w-5 h-5 text-blue-400" />{" "}
-                          Basic Information
-                        </h4>
-                        <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                          <div className="space-y-3">
-                            <div>
-                              <label className="text-sm font-medium text-gray-400">
-                                Event Name
-                              </label>
-                              <p className="text-white font-semibold">
-                                {event.name}
-                              </p>
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium text-gray-400">
-                                Company
-                              </label>
-                              <p className="text-white">{event.company}</p>
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium text-gray-400">
-                                Event Type
-                              </label>
-                              <p className="text-white">Offline Event</p>
-                            </div>
+                              );
+                            })}
                           </div>
                         </div>
-                      </div>
 
-                      <div className="space-y-4">
-                        <h4 className="font-bold text-gray-100 text-lg flex items-center gap-2">
-                          <Clock className="w-5 h-5 text-green-400" />{" "}
-                          Schedule
-                        </h4>
-                        <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                          <div className="space-y-3">
-                            <label className="text-sm font-medium text-gray-400">
-                              Date
-                              <p className="text-white">
-                                Wednesday, June 15
-                              </p>
-                            </label>
-                            <div className="grid mt-3">
-                              <div>
-                                <label className="text-sm font-medium text-gray-400">
-                                  Start Time - End Time
-                                </label>
-                                <p className="text-white">
-                                  {event.time.split(" - ")[0]} -{" "}
-                                  {event.time.split(" - ")[1]}
-                                </p>
-                              </div>
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium text-gray-400">
-                                Location
-                              </label>
-                              <p className="text-white flex items-center gap-2">
-                                <MapPin className="w-4 h-4 text-green-400" />
-                                Main Conference Hall, Building A
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Equipment & Package */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <h4 className="font-bold text-gray-100 text-lg flex items-center gap-2">
-                          <Briefcase className="w-5 h-5 text-yellow-400" />{" "}
-                          Equipment Package
-                        </h4>
-                        <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-yellow-300 font-semibold">
-                              Premium Package
-                            </span>
-                          </div>
-                          <div className="space-y-2 text-sm">
-                            {[
-                              "Wireless Microphones",
-                              "LED Projection",
-                              "Multinational Sound System",
-                              "LED Screen 2x20m",
-                            ].map((item, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center gap-2 text-gray-300"
-                              >
-                                <Check className="w-4 h-4 text-green-400" />
-                                {item}
+                        {/* Staff Assigned Section */}
+                        <div>
+                          <h4 className="font-bold text-gray-100 mb-4 text-xl flex items-center gap-2">
+                            <Users className="w-5 h-5 text-blue-400" /> Staff Assigned
+                          </h4>
+                          <div className="space-y-4">
+                            {Object.entries(staffByPosition).map(([position, names]) => (
+                              <div key={position} className="bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-inner">
+                                <p className="text-sm font-semibold text-blue-300 uppercase mb-2">{position}</p>
+                                <div className="flex flex-wrap gap-2">
+                                  {names.map((name) => {
+                                    const isConflicting = uniqueConflictingStaff.includes(name) && conflictCount > 0;
+                                    return (
+                                      <span
+                                        key={name}
+                                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${isConflicting
+                                          ? 'bg-red-700 bg-opacity-40 text-red-100 border border-red-600'
+                                          : 'bg-gray-700 text-gray-100 border border-gray-600'
+                                          }`}
+                                      >
+                                        {name}
+                                      </span>
+                                    );
+                                  })}
+                                </div>
                               </div>
                             ))}
                           </div>
                         </div>
-                      </div>
-
-                      <div className="space-y-4">
-                        <h4 className="font-bold text-gray-100 text-lg flex items-center gap-2">
-                          <FileText className="w-5 h-5 text-purple-400" />{" "}
-                          Documents
-                        </h4>
-                        <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-300 text-sm">
-                                Event Plan.pdf
-                              </span>
-                              <button className="text-blue-400 hover:text-blue-300 text-sm">
-                                Download
-                              </button>
+                      </>
+                    ) : (
+                      // No Conflict View
+                      <>
+                        {/* Event Status Banner */}
+                        <div className="bg-green-900 bg-opacity-20 border border-green-800 rounded-xl p-5">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                                <Check className="w-6 h-6 text-white" />
+                              </div>
+                              <div>
+                                <h4 className="font-bold text-green-300 text-xl">Event Ready</h4>
+                                <p className="text-green-200 text-sm">All systems operational - No conflicts detected</p>
+                              </div>
                             </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-300 text-sm">
-                                Equipment List.xlsx
-                              </span>
-                              <button className="text-blue-400 hover:text-blue-300 text-sm">
-                                Download
-                              </button>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-300 text-sm">
-                                Staff Schedule.pdf
-                              </span>
-                              <button className="text-blue-400 hover:text-blue-300 text-sm">
-                                Download
-                              </button>
+                            <div className="text-right">
+                              <div className="text-green-300 font-semibold">Status: Ready</div>
+                              <div className="text-green-200 text-sm">All staff confirmed</div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
 
-                    {/* Staff Assigned Section */}
-                    <div>
-                      <h4 className="font-bold text-gray-100 mb-4 text-xl flex items-center gap-2">
-                        <Users className="w-5 h-5 text-blue-400" /> Staff
-                        Assigned
-                      </h4>
-                      <div className="space-y-4">
-                        {Object.entries(staffByPosition).map(
-                          ([position, names]) => (
-                            <div
-                              key={position}
-                              className="bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-inner"
-                            >
-                              <div className="flex items-center mb-3">
-                                <p className="text-sm font-semibold text-blue-300 uppercase">
-                                  {position}
-                                </p>
-                                <span className="text-xs bg-black text-white px-2 py-1 ml-2 rounded-full">
-                                  {names.length}/{names.length}
-                                </span>
-                              </div>
-                              <div className="flex flex-wrap gap-2">
-                                {names.map((name) => {
-                                  const isConflicting = uniqueConflictingStaff.includes(name);
-                                  return (
+                        {/* Staff Assigned - Complete View */}
+                        <div>
+                          <h4 className="font-bold text-gray-100 mb-4 text-xl flex items-center gap-2">
+                            <Users className="w-5 h-5 text-blue-400" /> Staff Assigned
+                          </h4>
+                          <div className="space-y-4">
+                            {Object.entries(staffByPosition).map(([position, names]) => (
+                              <div key={position} className="bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-inner">
+                                <div className="flex items-center justify-between mb-3">
+                                  <p className="text-sm font-semibold text-blue-300 uppercase">{position}</p>
+                                  <span className="text-xs bg-green-600 text-white px-2 py-1 rounded-full">
+                                    {names.length} assigned
+                                  </span>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                  {names.map((name) => (
                                     <span
                                       key={name}
-                                      className={`px-3 py-1.5 rounded-full text-sm font-medium ${isConflicting
-                                        ? "bg-red-700 bg-opacity-40 text-red-100 border border-red-600"
-                                        : "bg-green-700 bg-opacity-20 text-green-100 border border-green-600"
-                                        }`}
+                                      className="px-3 py-1.5 rounded-full text-sm font-medium bg-green-700 bg-opacity-20 text-green-100 border border-green-600"
                                     >
                                       {name}
                                     </span>
-                                  );
-                                })}
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    </div>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -1489,9 +1307,7 @@ export function CardListView() {
         ) : (
           <div className="text-center py-16 text-gray-400 bg-gray-800 rounded-xl border border-gray-700">
             <p className="font-bold text-xl mb-2">No events to display</p>
-            <p className="text-base">
-              Please adjust your filters or sort options to see events.
-            </p>
+            <p className="text-base">Please adjust your filters or sort options to see events.</p>
           </div>
         )}
       </div>
